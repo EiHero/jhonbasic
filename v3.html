@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Bilhetes de Passagem</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        h2 {
+            color: #3498db;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-add {
+            background-color: #2ecc71;
+            margin-top: 10px;
+        }
+        
+        .btn-add:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-print {
+            background-color: #e74c3c;
+            display: block;
+            margin: 30px auto;
+            padding: 15px 30px;
+            font-size: 18px;
+        }
+        
+        .btn-print:hover {
+            background-color: #c0392b;
+        }
+        
+        .passenger {
+            background-color: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+        }
+        
+        .passenger-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .passenger-title {
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .btn-remove {
+            background-color: #e74c3c;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        
+        .ticket-preview {
+            display: none;
+            margin-top: 30px;
+            border: 2px dashed #ddd;
+            padding: 20px;
+            background-color: white;
+        }
+        
+        .ticket {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid #333;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Estilos para os temas comemorativos */
+        .tema-natal {
+            background: linear-gradient(to bottom, #ffffff, #f0f8ff);
+            border: 2px solid #c41e3a;
+            position: relative;
+        }
+        
+        .tema-natal::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(to right, #c41e3a, #1e7f34, #c41e3a);
+        }
+        
+        .tema-natal .ticket-header {
+            background-color: #1e7f34;
+            color: white;
+            padding: 15px;
+            margin: -20px -20px 20px -20px;
+            border-radius: 0;
+            position: relative;
+        }
+        
+        .tema-natal .ticket-title {
+            color: white;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tema-natal .ticket-title::after {
+            content: "🎄";
+            margin-left: 10px;
+        }
+        
+        .tema-natal .ticket-section-title {
+            color: #c41e3a;
+            border-bottom: 1px dashed #1e7f34;
+        }
+        
+        .tema-natal .total-value {
+            color: #c41e3a;
+        }
+        
+        .tema-natal .festive-decoration {
+            position: absolute;
+            font-size: 24px;
+            opacity: 0.7;
+        }
+        
+        .tema-mulheres {
+            background: linear-gradient(to bottom, #fff, #fff0f5);
+            border: 2px solid #d63384;
+        }
+        
+        .tema-mulheres::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(to right, #d63384, #ff69b4, #d63384);
+        }
+        
+        .tema-mulheres .ticket-header {
+            background: linear-gradient(to right, #d63384, #ff69b4);
+            color: white;
+            padding: 15px;
+            margin: -20px -20px 20px -20px;
+            border-radius: 0;
+        }
+        
+        .tema-mulheres .ticket-title {
+            color: white;
+            position: relative;
+        }
+        
+        .tema-mulheres .ticket-title::after {
+            content: "🌸";
+            margin-left: 10px;
+        }
+        
+        .tema-mulheres .ticket-section-title {
+            color: #d63384;
+            border-bottom: 1px dashed #ff69b4;
+        }
+        
+        .tema-mulheres .total-value {
+            color: #d63384;
+        }
+        
+        .tema-mulheres .festive-decoration {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0.7;
+        }
+        
+        .ticket-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .ticket-logo {
+            max-width: 200px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        
+        .ticket-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .ticket-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .ticket-section {
+            margin-bottom: 15px;
+        }
+        
+        .ticket-section-title {
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 3px;
+        }
+        
+        .passenger-list {
+            margin-top: 15px;
+        }
+        
+        .passenger-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .passenger-item:last-child {
+            border-bottom: none;
+        }
+        
+        .total-value {
+            font-weight: bold;
+            text-align: right;
+            font-size: 18px;
+            margin-top: 10px;
+            color: #e74c3c;
+        }
+        
+        .logo-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .logo-size-input {
+            width: 80px;
+        }
+        
+        .color-picker {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .color-option.selected {
+            border-color: #333;
+        }
+        
+        .theme-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .theme-option {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .theme-option.selected {
+            border-color: #3498db;
+            background-color: #f0f8ff;
+        }
+        
+        .theme-option.natal {
+            background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+        }
+        
+        .theme-option.mulheres {
+            background: linear-gradient(to bottom, #fff0f6, #fff9fb);
+        }
+        
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .ticket, .ticket * {
+                visibility: visible;
+            }
+            .ticket {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none;
+                border: none;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sistema de Bilhetes de Passagem</h1>
+            <p>Preencha os dados abaixo para gerar o bilhete de passagem</p>
+        </header>
+        
+        <form id="ticketForm">
+            <div class="form-section">
+                <h2>Informações da Viagem</h2>
+                
+                <div class="form-group">
+                    <label for="origin">Origem da Viagem:</label>
+                    <input type="text" id="origin" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="destination">Destino da Viagem:</label>
+                    <input type="text" id="destination" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="vesselName">Nome da Embarcação:</label>
+                    <input type="text" id="vesselName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="vesselType">Tipo de Embarcação:</label>
+                    <select id="vesselType" required>
+                        <option value="">Selecione o tipo</option>
+                        <option value="Barco">Barco</option>
+                        <option value="Lancha">Lancha</option>
+                        <option value="Balsa">Balsa</option>
+                        <option value="Catamarã">Catamarã</option>
+                        <option value="Jet Ski">Jet Ski</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="departureDate">Data da Viagem:</label>
+                    <input type="date" id="departureDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="departureTime">Hora de Saída:</label>
+                    <input type="time" id="departureTime" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="duration">Duração Estimada (horas):</label>
+                    <input type="number" id="duration" min="0.5" step="0.5" required>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2>Passageiros</h2>
+                <div id="passengersContainer">
+                    <!-- Passageiros serão adicionados aqui dinamicamente -->
+                </div>
+                <button type="button" id="addPassenger" class="btn-add">+ Adicionar Passageiro</button>
+            </div>
+            
+            <div class="form-section">
+                <h2>Personalização do Bilhete</h2>
+                
+                <div class="form-group">
+                    <label for="tema">Tema do Bilhete:</label>
+                    <div class="theme-selector">
+                        <div class="theme-option selected" data-theme="padrao">
+                            <div>Padrão</div>
+                            <small>Profissional</small>
+                        </div>
+                        <div class="theme-option natal" data-theme="natal">
+                            <div>Natal</div>
+                            <small>Festivo</small>
+                        </div>
+                        <div class="theme-option mulheres" data-theme="mulheres">
+                            <div>Dia das Mulheres</div>
+                            <small>Comemorativo</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="logoSize">Tamanho da Logo (px):</label>
+                    <div class="logo-controls">
+                        <input type="number" id="logoSize" class="logo-size-input" min="50" max="400" value="200">
+                        <button type="button" id="increaseLogo">+</button>
+                        <button type="button" id="decreaseLogo">-</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Cor de Destaque (Tema Padrão):</label>
+                    <div class="color-picker">
+                        <div class="color-option selected" style="background-color: #3498db;" data-color="#3498db"></div>
+                        <div class="color-option" style="background-color: #e74c3c;" data-color="#e74c3c"></div>
+                        <div class="color-option" style="background-color: #2ecc71;" data-color="#2ecc71"></div>
+                        <div class="color-option" style="background-color: #f39c12;" data-color="#f39c12"></div>
+                        <div class="color-option" style="background-color: #9b59b6;" data-color="#9b59b6"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="observations">Observações (uma por linha):</label>
+                    <textarea id="observations">• Apresente este bilhete no embarque
+• Embarque com 30 minutos de antecedência
+• É proibido o transporte de substâncias perigosas
+• Em caso de cancelamento, consulte nossa política</textarea>
+                </div>
+            </div>
+            
+            <button type="button" id="generateTicket" class="btn-print">Gerar Bilhete</button>
+        </form>
+        
+        <div id="ticketPreview" class="ticket-preview">
+            <div class="ticket" id="ticket">
+                <div class="ticket-header">
+                    <img src="logo.png" alt="Logo da Empresa" class="ticket-logo" onerror="this.style.display='none'">
+                    <div class="ticket-title">BILHETE DE PASSAGEM</div>
+                </div>
+                
+                <div class="ticket-info">
+                    <div>
+                        <div class="ticket-section">
+                            <div class="ticket-section-title">ORIGEM</div>
+                            <div id="ticketOrigin"></div>
+                        </div>
+                        <div class="ticket-section">
+                            <div class="ticket-section-title">DESTINO</div>
+                            <div id="ticketDestination"></div>
+                        </div>
+                        <div class="ticket-section">
+                            <div class="ticket-section-title">DATA E HORA</div>
+                            <div id="ticketDateTime"></div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="ticket-section">
+                            <div class="ticket-section-title">EMBARCAÇÃO</div>
+                            <div id="ticketVessel"></div>
+                        </div>
+                        <div class="ticket-section">
+                            <div class="ticket-section-title">DURAÇÃO</div>
+                            <div id="ticketDuration"></div>
+                        </div>
+                        <div class="ticket-section">
+                            <div class="ticket-section-title">TIPO</div>
+                            <div id="ticketType"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ticket-section">
+                    <div class="ticket-section-title">PASSAGEIROS</div>
+                    <div id="ticketPassengers" class="passenger-list"></div>
+                    <div id="ticketTotal" class="total-value"></div>
+                </div>
+                
+                <div class="ticket-section">
+                    <div class="ticket-section-title">OBSERVAÇÕES</div>
+                    <div id="ticketObservations"></div>
+                </div>
+            </div>
+            
+            <div class="no-print" style="text-align: center; margin-top: 20px;">
+                <button id="printTicket" class="btn-print">Imprimir Bilhete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const passengersContainer = document.getElementById('passengersContainer');
+            const addPassengerBtn = document.getElementById('addPassenger');
+            const generateTicketBtn = document.getElementById('generateTicket');
+            const printTicketBtn = document.getElementById('printTicket');
+            const ticketPreview = document.getElementById('ticketPreview');
+            const ticketElement = document.getElementById('ticket');
+            const form = document.getElementById('ticketForm');
+            const logoSizeInput = document.getElementById('logoSize');
+            const increaseLogoBtn = document.getElementById('increaseLogo');
+            const decreaseLogoBtn = document.getElementById('decreaseLogo');
+            const colorOptions = document.querySelectorAll('.color-option');
+            const observationsTextarea = document.getElementById('observations');
+            const themeOptions = document.querySelectorAll('.theme-option');
+            
+            let passengerCount = 0;
+            let selectedColor = '#3498db';
+            let selectedTheme = 'padrao';
+            
+            // Adicionar o primeiro passageiro
+            addPassenger();
+            
+            // Adicionar passageiro
+            addPassengerBtn.addEventListener('click', addPassenger);
+            
+            // Gerar bilhete
+            generateTicketBtn.addEventListener('click', generateTicket);
+            
+            // Imprimir bilhete
+            printTicketBtn.addEventListener('click', function() {
+                window.print();
+            });
+            
+            // Controles do tamanho da logo
+            increaseLogoBtn.addEventListener('click', function() {
+                let currentSize = parseInt(logoSizeInput.value);
+                if (currentSize < 400) {
+                    logoSizeInput.value = currentSize + 10;
+                }
+            });
+            
+            decreaseLogoBtn.addEventListener('click', function() {
+                let currentSize = parseInt(logoSizeInput.value);
+                if (currentSize > 50) {
+                    logoSizeInput.value = currentSize - 10;
+                }
+            });
+            
+            // Seleção de cor
+            colorOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remover seleção anterior
+                    colorOptions.forEach(opt => opt.classList.remove('selected'));
+                    // Selecionar nova cor
+                    this.classList.add('selected');
+                    selectedColor = this.getAttribute('data-color');
+                    
+                    // Aplicar cor aos elementos de destaque
+                    applyColorTheme();
+                });
+            });
+            
+            // Seleção de tema
+            themeOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remover seleção anterior
+                    themeOptions.forEach(opt => opt.classList.remove('selected'));
+                    // Selecionar novo tema
+                    this.classList.add('selected');
+                    selectedTheme = this.getAttribute('data-theme');
+                });
+            });
+            
+            function applyColorTheme() {
+                // Aplicar cor aos botões e elementos de destaque
+                const buttons = document.querySelectorAll('button:not(.btn-remove)');
+                buttons.forEach(button => {
+                    if (button.id !== 'printTicket' && button.id !== 'generateTicket') {
+                        button.style.backgroundColor = selectedColor;
+                    }
+                });
+                
+                // Aplicar cor apenas se for o tema padrão
+                if (selectedTheme === 'padrao') {
+                    const sectionTitles = document.querySelectorAll('.ticket-section-title');
+                    sectionTitles.forEach(title => {
+                        title.style.color = selectedColor;
+                    });
+                }
+            }
+            
+            function addPassenger() {
+                passengerCount++;
+                const passengerDiv = document.createElement('div');
+                passengerDiv.className = 'passenger';
+                passengerDiv.innerHTML = `
+                    <div class="passenger-header">
+                        <div class="passenger-title">Passageiro ${passengerCount}</div>
+                        ${passengerCount > 1 ? '<button type="button" class="btn-remove">Remover</button>' : ''}
+                    </div>
+                    <div class="form-group">
+                        <label for="passengerName${passengerCount}">Nome Completo:</label>
+                        <input type="text" id="passengerName${passengerCount}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="passengerValue${passengerCount}">Valor da Passagem (R$):</label>
+                        <input type="number" id="passengerValue${passengerCount}" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="passengerCPF${passengerCount}">CPF:</label>
+                        <input type="text" id="passengerCPF${passengerCount}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="passengerBirth${passengerCount}">Data de Nascimento:</label>
+                        <input type="date" id="passengerBirth${passengerCount}" required>
+                    </div>
+                `;
+                
+                passengersContainer.appendChild(passengerDiv);
+                
+                // Aplicar cor ao botão de adicionar passageiro
+                applyColorTheme();
+                
+                // Adicionar evento para remover passageiro
+                if (passengerCount > 1) {
+                    const removeBtn = passengerDiv.querySelector('.btn-remove');
+                    removeBtn.addEventListener('click', function() {
+                        passengersContainer.removeChild(passengerDiv);
+                        passengerCount--;
+                        updatePassengerNumbers();
+                    });
+                }
+            }
+            
+            function updatePassengerNumbers() {
+                const passengers = passengersContainer.querySelectorAll('.passenger');
+                passengers.forEach((passenger, index) => {
+                    const title = passenger.querySelector('.passenger-title');
+                    title.textContent = `Passageiro ${index + 1}`;
+                    
+                    // Atualizar IDs dos inputs
+                    const inputs = passenger.querySelectorAll('input');
+                    inputs[0].id = `passengerName${index + 1}`;
+                    inputs[1].id = `passengerValue${index + 1}`;
+                    inputs[2].id = `passengerCPF${index + 1}`;
+                    inputs[3].id = `passengerBirth${index + 1}`;
+                    
+                    // Atualizar labels
+                    const labels = passenger.querySelectorAll('label');
+                    labels[0].htmlFor = `passengerName${index + 1}`;
+                    labels[1].htmlFor = `passengerValue${index + 1}`;
+                    labels[2].htmlFor = `passengerCPF${index + 1}`;
+                    labels[3].htmlFor = `passengerBirth${index + 1}`;
+                    
+                    // Mostrar/ocultar botão de remover
+                    const removeBtn = passenger.querySelector('.btn-remove');
+                    if (index === 0 && removeBtn) {
+                        passenger.querySelector('.passenger-header').removeChild(removeBtn);
+                    } else if (index > 0 && !removeBtn) {
+                        const header = passenger.querySelector('.passenger-header');
+                        const newRemoveBtn = document.createElement('button');
+                        newRemoveBtn.type = 'button';
+                        newRemoveBtn.className = 'btn-remove';
+                        newRemoveBtn.textContent = 'Remover';
+                        newRemoveBtn.addEventListener('click', function() {
+                            passengersContainer.removeChild(passenger);
+                            passengerCount--;
+                            updatePassengerNumbers();
+                        });
+                        header.appendChild(newRemoveBtn);
+                    }
+                });
+            }
+            
+            function generateTicket() {
+                // Validar formulário
+                if (!form.checkValidity()) {
+                    alert('Por favor, preencha todos os campos obrigatórios.');
+                    return;
+                }
+                
+                // Coletar dados da viagem
+                const origin = document.getElementById('origin').value;
+                const destination = document.getElementById('destination').value;
+                const vesselName = document.getElementById('vesselName').value;
+                const vesselType = document.getElementById('vesselType').value;
+                const departureDate = document.getElementById('departureDate').value;
+                const departureTime = document.getElementById('departureTime').value;
+                const duration = document.getElementById('duration').value;
+                const logoSize = logoSizeInput.value;
+                const observations = observationsTextarea.value;
+                
+                // Formatar data e hora
+                const dateObj = new Date(departureDate);
+                const formattedDate = dateObj.toLocaleDateString('pt-BR');
+                const formattedDateTime = `${formattedDate} às ${departureTime}`;
+                
+                // Coletar dados dos passageiros
+                const passengers = [];
+                let totalValue = 0;
+                
+                for (let i = 1; i <= passengerCount; i++) {
+                    const name = document.getElementById(`passengerName${i}`).value;
+                    const value = parseFloat(document.getElementById(`passengerValue${i}`).value);
+                    const cpf = document.getElementById(`passengerCPF${i}`).value;
+                    const birth = document.getElementById(`passengerBirth${i}`).value;
+                    
+                    // Formatar CPF
+                    const formattedCPF = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+                    
+                    // Formatar data de nascimento
+                    const birthObj = new Date(birth);
+                    const formattedBirth = birthObj.toLocaleDateString('pt-BR');
+                    
+                    passengers.push({
+                        name,
+                        value,
+                        cpf: formattedCPF,
+                        birth: formattedBirth
+                    });
+                    
+                    totalValue += value;
+                }
+                
+                // Aplicar tema selecionado
+                ticketElement.className = 'ticket';
+                if (selectedTheme !== 'padrao') {
+                    ticketElement.classList.add(`tema-${selectedTheme}`);
+                    
+                    // Adicionar decorações festivas
+                    addFestiveDecorations();
+                } else {
+                    // Aplicar cor de destaque apenas para o tema padrão
+                    applyColorTheme();
+                }
+                
+                // Atualizar preview do bilhete
+                document.getElementById('ticketOrigin').textContent = origin;
+                document.getElementById('ticketDestination').textContent = destination;
+                document.getElementById('ticketDateTime').textContent = formattedDateTime;
+                document.getElementById('ticketVessel').textContent = vesselName;
+                document.getElementById('ticketDuration').textContent = `${duration} horas`;
+                document.getElementById('ticketType').textContent = vesselType;
+                
+                // Aplicar tamanho da logo
+                const ticketLogo = document.querySelector('.ticket-logo');
+                ticketLogo.style.maxWidth = `${logoSize}px`;
+                
+                // Atualizar lista de passageiros
+                const passengersList = document.getElementById('ticketPassengers');
+                passengersList.innerHTML = '';
+                
+                passengers.forEach(passenger => {
+                    const passengerItem = document.createElement('div');
+                    passengerItem.className = 'passenger-item';
+                    passengerItem.innerHTML = `
+                        <div>
+                            <strong>${passenger.name}</strong><br>
+                            CPF: ${passenger.cpf} | Nasc: ${passenger.birth}
+                        </div>
+                        <div>R$ ${passenger.value.toFixed(2)}</div>
+                    `;
+                    passengersList.appendChild(passengerItem);
+                });
+                
+                // Atualizar valor total
+                document.getElementById('ticketTotal').textContent = `Valor Total: R$ ${totalValue.toFixed(2)}`;
+                
+                // Atualizar observações
+                const ticketObservations = document.getElementById('ticketObservations');
+                ticketObservations.innerHTML = '';
+                
+                // Processar cada linha das observações
+                const observationLines = observations.split('\n');
+                observationLines.forEach(line => {
+                    if (line.trim() !== '') {
+                        const p = document.createElement('p');
+                        p.textContent = line;
+                        ticketObservations.appendChild(p);
+                    }
+                });
+                
+                // Mostrar preview do bilhete
+                ticketPreview.style.display = 'block';
+                
+                // Rolar até o bilhete
+                ticketPreview.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            function addFestiveDecorations() {
+                // Remover decorações anteriores
+                const existingDecorations = document.querySelectorAll('.festive-decoration');
+                existingDecorations.forEach(el => el.remove());
+                
+                if (selectedTheme === 'natal') {
+                    // Adicionar decorações de Natal
+                    const decorations = ['❄️', '🎅', '🎁', '🔔', '⭐'];
+                    for (let i = 0; i < 8; i++) {
+                        const decoration = document.createElement('div');
+                        decoration.className = 'festive-decoration';
+                        decoration.textContent = decorations[Math.floor(Math.random() * decorations.length)];
+                        decoration.style.top = `${10 + Math.random() * 80}%`;
+                        decoration.style.left = `${5 + Math.random() * 90}%`;
+                        decoration.style.transform = `rotate(${Math.random() * 360}deg)`;
+                        ticketElement.appendChild(decoration);
+                    }
+                } else if (selectedTheme === 'mulheres') {
+                    // Adicionar decorações do Dia das Mulheres
+                    const decorations = ['🌸', '💮', '🏵️', '🌺', '🌷'];
+                    for (let i = 0; i < 6; i++) {
+                        const decoration = document.createElement('div');
+                        decoration.className = 'festive-decoration';
+                        decoration.textContent = decorations[Math.floor(Math.random() * decorations.length)];
+                        decoration.style.top = `${10 + Math.random() * 80}%`;
+                        decoration.style.left = `${5 + Math.random() * 90}%`;
+                        decoration.style.transform = `rotate(${Math.random() * 360}deg)`;
+                        ticketElement.appendChild(decoration);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
