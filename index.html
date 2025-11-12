@@ -374,23 +374,64 @@
             background: linear-gradient(to bottom, #fff0f6, #fff9fb);
         }
         
+        /* Estilos aprimorados para impressão */
         @media print {
+            @page {
+                margin: 0.5cm;
+                size: auto; /* Impressão no tamanho do conteúdo */
+            }
+            
+            body, html {
+                margin: 0;
+                padding: 0;
+                background: white !important;
+                height: 100%;
+            }
+            
             body * {
                 visibility: hidden;
             }
-            .ticket, .ticket * {
+            
+            .ticket-preview, .ticket-preview * {
                 visibility: visible;
             }
-            .ticket {
+            
+            .ticket-preview {
+                display: block !important;
                 position: absolute;
                 left: 0;
                 top: 0;
                 width: 100%;
-                box-shadow: none;
+                margin: 0;
+                padding: 0;
                 border: none;
+                box-shadow: none;
+                background: white;
             }
-            .no-print {
-                display: none;
+            
+            .ticket {
+                box-shadow: none;
+                border: 1px solid #000;
+                margin: 0 auto;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            
+            .no-print, .no-print * {
+                display: none !important;
+            }
+            
+            /* Remover qualquer cabeçalho ou rodapé do navegador */
+            @page :first {
+                margin-top: 0;
+            }
+            
+            @page :left {
+                margin-left: 0;
+            }
+            
+            @page :right {
+                margin-right: 0;
             }
         }
     </style>
@@ -597,9 +638,23 @@
             // Gerar bilhete
             generateTicketBtn.addEventListener('click', generateTicket);
             
-            // Imprimir bilhete
+            // Imprimir bilhete - usando uma nova abordagem
             printTicketBtn.addEventListener('click', function() {
+                // Abrir uma nova janela para impressão
+                const printContent = ticketPreview.innerHTML;
+                const originalContent = document.body.innerHTML;
+                
+                // Substituir o conteúdo da página atual apenas pelo bilhete
+                document.body.innerHTML = printContent;
+                
+                // Chamar a função de impressão
                 window.print();
+                
+                // Restaurar o conteúdo original após a impressão
+                document.body.innerHTML = originalContent;
+                
+                // Restaurar os event listeners
+                window.location.reload();
             });
             
             // Controles do tamanho da logo
